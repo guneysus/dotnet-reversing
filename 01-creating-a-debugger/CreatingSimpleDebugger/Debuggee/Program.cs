@@ -36,10 +36,12 @@ namespace Debuggee
         private static void HeartBeat()
         {
             var ts = DateTime.Now.ToString();
-
-            System.Diagnostics.Trace.WriteLine($"[TRACE] {ts}");
-            Console.WriteLine($"[CONSOLE] {ts}");
-            Debug.WriteLine($"[DEBUG] {ts}");
+#if TRACE
+            System.Diagnostics.Trace.WriteLine($"[TRACE] {ts}"); 
+#endif
+#if DEBUG
+            Debug.WriteLine($"[DEBUG] {ts}"); 
+#endif
         }
     }
 }

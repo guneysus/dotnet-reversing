@@ -123,7 +123,7 @@ namespace SimpleDebugger
 
 
         [DllImport(KERNEL32, SetLastError = true)]
-        public static extern int GetFileSize(IntPtr hFile, out uint lpFileSizeHigh);
+        public static extern uint GetFileSize(IntPtr hFile, out uint lpFileSizeHigh);
 
         #region WaitForDebugEvent
 
@@ -304,5 +304,68 @@ namespace SimpleDebugger
             IntPtr lpBaseAddress, [Out] byte[] lpBuffer, int dwSize, out IntPtr lpNumberOfBytesRead);
 
         #endregion
+
+        #region GetFinalPathNameByHandle
+        [DllImport(KERNEL32, SetLastError = true)]
+        public static extern uint GetFinalPathNameByHandleW(IntPtr hFile,
+            out IntPtr lpszFilePath,
+            uint cchFilePath,
+            uint dwFlags);
+
+        [DllImport(KERNEL32, SetLastError = true)]
+        public static extern uint GetFinalPathNameByHandleA(IntPtr hFile,
+            out StringBuilder lpszFilePath,
+            uint cchFilePath,
+            uint dwFlags);
+
+        #endregion
+
+        [DllImport(KERNEL32, SetLastError = true)]
+        public static extern bool GetFileSizeEx(IntPtr hFile, out long lpFileSize);
+
+
+        [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern IntPtr CreateFileMapping(
+            IntPtr hFile,
+            IntPtr lpFileMappingAttributes,
+            FileMapProtection flProtect,
+            uint dwMaximumSizeHigh,
+            uint dwMaximumSizeLow,
+            out string lpName);
+
+        [Flags]
+        public enum FileMapProtection : uint
+        {
+            PageReadonly = 0x02,
+            PageReadWrite = 0x04,
+            PageWriteCopy = 0x08,
+            PageExecuteRead = 0x20,
+            PageExecuteReadWrite = 0x40,
+            SectionCommit = 0x8000000,
+            SectionImage = 0x1000000,
+            SectionNoCache = 0x10000000,
+            SectionReserve = 0x4000000,
+        }
+
+
+        [DllImport(KERNEL32, SetLastError = true)]
+        public static extern IntPtr MapViewOfFile(IntPtr hFileMappingObject,
+           FileMapAccessType dwDesiredAccess, uint dwFileOffsetHigh, uint dwFileOffsetLow,
+           uint dwNumberOfBytesToMap);
+
+        public enum FileMapAccessType : uint
+        {
+            Copy = 0x01,
+            Write = 0x02,
+            Read = 0x04,
+            AllAccess = 0x08,
+            Execute = 0x20,
+        }
+
+        [DllImport("psapi.dll", SetLastError = true)]
+        public static extern uint GetMappedFileName(IntPtr hProcess,
+            IntPtr lpv,
+            out StringBuilder lpFilename,
+            uint nSize);
     }
 }

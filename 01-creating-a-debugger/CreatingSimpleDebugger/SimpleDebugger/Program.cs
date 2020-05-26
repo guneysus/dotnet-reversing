@@ -18,7 +18,7 @@ namespace SimpleDebugger
 
         static void Main(string[] args)
         {
-            debuggee = StartDebuggee(CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS);
+            debuggee = StartDebuggee(CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS | CreateProcessFlags.CREATE_NEW_CONSOLE);
 
             while (true)
             {
@@ -29,50 +29,116 @@ namespace SimpleDebugger
         private static void ProcessDebugEvent(DEBUG_EVENT evt)
         {
             events.Add(evt);
-            Console.WriteLine($"Event: {evt.dwDebugEventCode}");
+            //Console.WriteLine($"Event: {evt.dwDebugEventCode}");
 
             switch (evt.dwDebugEventCode)
             {
                 case DebugEventType.RIP_EVENT:
                     break;
                 case DebugEventType.OUTPUT_DEBUG_STRING_EVENT:
-                    //var data = evt.DebugString.lpDebugStringData;
-                    byte[] buffer = new byte[1024] ;
-                    IntPtr bytesReadPtr = IntPtr.Zero;
-
-                        NativeMethods.ReadProcessMemory(
-                    debuggee.Handle,
-                    evt.DebugString.lpDebugStringData,
-                    buffer,
-                    evt.DebugString.nDebugStringLength,
-                    out bytesReadPtr);
-
-                    var err = Marshal.GetLastWin32Error();
-                    var text = Encoding.UTF8.GetString(buffer);
-
+                    ProcessOutputDebugStringEvent(evt);
                     break;
                 case DebugEventType.UNLOAD_DLL_DEBUG_EVENT:
                     break;
                 case DebugEventType.LOAD_DLL_DEBUG_EVENT:
+                    ProcessLoadDLLEvent(evt);
                     break;
                 case DebugEventType.EXIT_PROCESS_DEBUG_EVENT:
+                    ProcessExitProcessEvent(evt);
                     break;
                 case DebugEventType.EXIT_THREAD_DEBUG_EVENT:
+                    ProcessExitThreadEvent(evt);
                     break;
                 case DebugEventType.CREATE_PROCESS_DEBUG_EVENT:
-                    // get file name from handle
-                    //var handle = debugEvent.CreateProcessInfo.hFile;
-                    //var result = Marshal.PtrToStringAuto(handle);
-                    //uint lpFileSizeHigh;
-                    //var lpFileSizeLow = NativeMethods.GetFileSize(debugEvent.CreateProcessInfo.hFile, out lpFileSizeHigh);
+                    ProcessCreateProcessEvent(evt);
                     break;
                 case DebugEventType.CREATE_THREAD_DEBUG_EVENT:
+                    ProcessCreateThreadEvent(evt);
                     break;
                 case DebugEventType.EXCEPTION_DEBUG_EVENT:
                     break;
                 default:
                     break;
             }
+        }
+
+        private static void ProcessExitThreadEvent(DEBUG_EVENT evt)
+        {
+            Console.WriteLine($"[THREAD EXIT] ExitCode: {evt.ExitThread.dwExitCode.ToHex()}");
+        }
+
+        private static void ProcessExitProcessEvent(DEBUG_EVENT evt)
+        {
+            Console.WriteLine($"[PROCESS EXIT] ExitCode: {evt.ExitProcess.dwExitCode.ToHex()}");
+        }
+
+        private static void ProcessCreateProcessEvent(DEBUG_EVENT evt)
+        {
+            Console.WriteLine($"[PROCESS CREATED] hProcess: {evt.CreateProcessInfo.hProcess.ToHex()} hFile:{evt.CreateProcessInfo.hFile}");
+        }
+
+        private static void ProcessCreateThreadEvent(DEBUG_EVENT evt)
+        {
+            var t = evt.CreateThread.lpStartAddress.Method;
+            
+            Console.WriteLine($"[THREAD CREATED] " +
+                $"h:{evt.CreateThread.hThread.ToHex()} " +
+                $"lpLocalBase:{evt.CreateThread.lpThreadLocalBase.ToHex()}");
+        }
+
+        private static void ProcessLoadDLLEvent(DEBUG_EVENT evt)
+        {
+            // // Get the file size.
+            uint dwFileSizeHi = 0;
+            uint dwFileSizeLo = NativeMethods.GetFileSize(evt.LoadDll.hFile, out dwFileSizeHi);
+            var lpFilename = new StringBuilder(250);
+
+            if (dwFileSizeLo == 0 & dwFileSizeLo == 0)
+            {
+                throw new Exception();
+            }
+
+            // Create a file mapping object.
+            IntPtr hFileMap = IntPtr.Zero;
+            string lpName;
+            char[] pszFilename = new char[1024];
+
+            hFileMap = NativeMethods.CreateFileMapping(
+                evt.LoadDll.hFile,
+                IntPtr.Zero,
+                FileMapProtection.PageReadonly,
+                dwFileSizeHi,
+                dwFileSizeLo, out lpName);
+
+            var err = Marshal.GetLastWin32Error();
+
+            if (hFileMap != IntPtr.Zero & err == decimal.Zero)
+            {
+                // Create a file mapping to get the file name.
+                IntPtr pMem = IntPtr.Zero;
+                pMem = NativeMethods.MapViewOfFile(hFileMap, FileMapAccessType.Read, 0, 0, 250);
+                if (Marshal.GetLastWin32Error() == decimal.Zero & pMem !=  IntPtr.Zero)
+                {
+                }
+            }
+        }
+
+        private static void ProcessOutputDebugStringEvent(DEBUG_EVENT evt)
+        {
+            //var data = evt.DebugString.lpDebugStringData;
+            byte[] buffer = new byte[evt.DebugString.nDebugStringLength - 1];
+            IntPtr bytesReadPtr = IntPtr.Zero;
+
+            NativeMethods.ReadProcessMemory(
+        debuggee.Handle,
+        evt.DebugString.lpDebugStringData,
+        buffer,
+        evt.DebugString.nDebugStringLength - 1,
+        out bytesReadPtr);
+
+            var err = Marshal.GetLastWin32Error();
+            var text = Encoding.UTF8.GetString(buffer).TrimEnd('\r', '\n');
+            Trace.WriteLine(text);
         }
 
         private static Process StartDebuggee(CreateProcessFlags flags)
@@ -146,4 +212,11 @@ Thread Handle   {pInfo.hThread}
         }
 
     }
+}
+
+
+public static class Exts {
+    public static string ToHex(this IntPtr value) => String.Format("0x{0:X}", value);
+    public static string ToHex(this int value) => String.Format("0x{0:X}", value);
+    public static string ToHex(this uint value) => String.Format("0x{0:X}", value);
 }
