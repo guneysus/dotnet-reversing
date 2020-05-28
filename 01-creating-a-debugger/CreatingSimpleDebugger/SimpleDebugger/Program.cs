@@ -91,6 +91,14 @@ namespace SimpleDebugger
             // // Get the file size.
             uint dwFileSizeHi = 0;
             uint dwFileSizeLo = NativeMethods.GetFileSize(evt.LoadDll.hFile, out dwFileSizeHi);
+
+            StringBuilder sb = new StringBuilder(2048);
+
+            NativeMethods.GetFinalPathNameByHandle(evt.LoadDll.hFile, sb, 2048, FinalPathFlags.FILE_NAME_NORMALIZED);
+
+            Console.WriteLine($"[DLL LOAD] {sb.ToString()}");
+            return;
+
             var lpFilename = new StringBuilder(250);
 
             if (dwFileSizeLo == 0 & dwFileSizeLo == 0)
