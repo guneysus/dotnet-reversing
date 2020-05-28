@@ -130,15 +130,15 @@ namespace SimpleDebugger
             IntPtr bytesReadPtr = IntPtr.Zero;
 
             NativeMethods.ReadProcessMemory(
-        debuggee.Handle,
-        evt.DebugString.lpDebugStringData,
-        buffer,
-        evt.DebugString.nDebugStringLength - 1,
-        out bytesReadPtr);
+                debuggee.Handle,
+                evt.DebugString.lpDebugStringData,
+                buffer,
+                evt.DebugString.nDebugStringLength - 1,
+                out bytesReadPtr);
 
             var err = Marshal.GetLastWin32Error();
             var text = Encoding.UTF8.GetString(buffer).TrimEnd('\r', '\n');
-            Trace.WriteLine(text);
+            Console.WriteLine(text);
         }
 
         private static Process StartDebuggee(CreateProcessFlags flags)

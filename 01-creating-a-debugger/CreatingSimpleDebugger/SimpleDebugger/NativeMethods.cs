@@ -306,19 +306,27 @@ namespace SimpleDebugger
         #endregion
 
         #region GetFinalPathNameByHandle
-        [DllImport(KERNEL32, SetLastError = true)]
-        public static extern uint GetFinalPathNameByHandleW(IntPtr hFile,
-            out IntPtr lpszFilePath,
+        [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern uint GetFinalPathNameByHandle(IntPtr hFile,
+            [MarshalAs(UnmanagedType.LPTStr)] StringBuilder lpszFilePath,
             uint cchFilePath,
-            uint dwFlags);
+            FinalPathFlags dwFlags);
 
-        [DllImport(KERNEL32, SetLastError = true)]
-        public static extern uint GetFinalPathNameByHandleA(IntPtr hFile,
-            out StringBuilder lpszFilePath,
-            uint cchFilePath,
-            uint dwFlags);
+        [Flags]
+        public enum FinalPathFlags : uint
+        {
+            VOLUME_NAME_DOS = 0x0,
+            FILE_NAME_NORMALIZED = 0x0,
+            VOLUME_NAME_GUID = 0x1,
+            VOLUME_NAME_NT = 0x2,
+            VOLUME_NAME_NONE = 0x4,
+            FILE_NAME_OPENED = 0x8
+        }
 
         #endregion
+
+        [DllImport(KERNEL32, SetLastError = true)]
+        public static extern bool CloseHandle(IntPtr hObject);
 
         [DllImport(KERNEL32, SetLastError = true)]
         public static extern bool GetFileSizeEx(IntPtr hFile, out long lpFileSize);
