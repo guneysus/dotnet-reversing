@@ -37,7 +37,7 @@ namespace Debuggee
         {
             var ts = DateTime.Now.ToString();
             Trace.WriteLine($"[TRACE] {ts}"); 
-            Debug.WriteLine($"[DEBUG] {ts}"); 
+            //Debug.WriteLine($"[DEBUG] {ts}"); 
         }
     }
 }

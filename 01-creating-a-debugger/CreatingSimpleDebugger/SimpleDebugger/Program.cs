@@ -74,16 +74,20 @@ namespace SimpleDebugger
 
         private static void ProcessCreateProcessEvent(DEBUG_EVENT evt)
         {
-            Console.WriteLine($"[PROCESS CREATED] hProcess: {evt.CreateProcessInfo.hProcess.ToHex()} hFile:{evt.CreateProcessInfo.hFile}");
+            // // Get the file size.
+            uint dwFileSizeHi = 0;
+            uint dwFileSizeLo = NativeMethods.GetFileSize(evt.LoadDll.hFile, out dwFileSizeHi);
+
+            StringBuilder sb = new StringBuilder(2048);
+
+            NativeMethods.GetFinalPathNameByHandle(evt.CreateProcessInfo.hFile, sb, 2048, FinalPathFlags.VOLUME_NAME_NONE);
+
+            Console.WriteLine($"[PROCESS CREATED] {sb.ToString()}");
         }
 
         private static void ProcessCreateThreadEvent(DEBUG_EVENT evt)
         {
-            var t = evt.CreateThread.lpStartAddress.Method;
-            
-            Console.WriteLine($"[THREAD CREATED] " +
-                $"h:{evt.CreateThread.hThread.ToHex()} " +
-                $"lpLocalBase:{evt.CreateThread.lpThreadLocalBase.ToHex()}");
+            Console.WriteLine($"[THREAD CREATED] {evt.CreateThread.hThread.ToHex()}");
         }
 
         private static void ProcessLoadDLLEvent(DEBUG_EVENT evt)
@@ -94,7 +98,7 @@ namespace SimpleDebugger
 
             StringBuilder sb = new StringBuilder(2048);
 
-            NativeMethods.GetFinalPathNameByHandle(evt.LoadDll.hFile, sb, 2048, FinalPathFlags.FILE_NAME_NORMALIZED);
+            NativeMethods.GetFinalPathNameByHandle(evt.LoadDll.hFile, sb, 2048, FinalPathFlags.VOLUME_NAME_NONE);
 
             Console.WriteLine($"[DLL LOAD] {sb.ToString()}");
         }
@@ -114,7 +118,7 @@ namespace SimpleDebugger
 
             var err = Marshal.GetLastWin32Error();
             var text = Encoding.UTF8.GetString(buffer).TrimEnd('\r', '\n');
-            Trace.WriteLine(text);
+            Console.WriteLine(text);
         }
 
         private static Process StartDebuggee(CreateProcessFlags flags)
