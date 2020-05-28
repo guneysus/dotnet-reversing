@@ -52,5 +52,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Debuggee\Debuggee.csproj">
+      <Project>{9dd341cd-0fa6-451a-a5e8-bae0d9a1dfd6}</Project>
+      <Name>Debuggee</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
