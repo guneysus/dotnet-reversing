@@ -97,38 +97,6 @@ namespace SimpleDebugger
             NativeMethods.GetFinalPathNameByHandle(evt.LoadDll.hFile, sb, 2048, FinalPathFlags.FILE_NAME_NORMALIZED);
 
             Console.WriteLine($"[DLL LOAD] {sb.ToString()}");
-            return;
-
-            var lpFilename = new StringBuilder(250);
-
-            if (dwFileSizeLo == 0 & dwFileSizeLo == 0)
-            {
-                throw new Exception();
-            }
-
-            // Create a file mapping object.
-            IntPtr hFileMap = IntPtr.Zero;
-            string lpName;
-            char[] pszFilename = new char[1024];
-
-            hFileMap = NativeMethods.CreateFileMapping(
-                evt.LoadDll.hFile,
-                IntPtr.Zero,
-                FileMapProtection.PageReadonly,
-                dwFileSizeHi,
-                dwFileSizeLo, out lpName);
-
-            var err = Marshal.GetLastWin32Error();
-
-            if (hFileMap != IntPtr.Zero & err == decimal.Zero)
-            {
-                // Create a file mapping to get the file name.
-                IntPtr pMem = IntPtr.Zero;
-                pMem = NativeMethods.MapViewOfFile(hFileMap, FileMapAccessType.Read, 0, 0, 250);
-                if (Marshal.GetLastWin32Error() == decimal.Zero & pMem !=  IntPtr.Zero)
-                {
-                }
-            }
         }
 
         private static void ProcessOutputDebugStringEvent(DEBUG_EVENT evt)
@@ -146,7 +114,7 @@ namespace SimpleDebugger
 
             var err = Marshal.GetLastWin32Error();
             var text = Encoding.UTF8.GetString(buffer).TrimEnd('\r', '\n');
-            Console.WriteLine(text);
+            Trace.WriteLine(text);
         }
 
         private static Process StartDebuggee(CreateProcessFlags flags)
