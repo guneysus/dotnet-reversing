@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Timers;
@@ -9,12 +10,14 @@ using System.Windows.Threading;
 
 namespace Debuggee
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             var myPid = Process.GetCurrentProcess().Id;
             Console.WriteLine($"MYPID: {myPid}");
+
+            //return;
 
             var ticker = new System.Timers.Timer(1000);
 

@@ -134,6 +134,7 @@ namespace SimpleDebugger
 
         public enum DebugEventType : uint
         {
+            NONE = 0,
             RIP_EVENT = 9,
             OUTPUT_DEBUG_STRING_EVENT = 8,
             UNLOAD_DLL_DEBUG_EVENT = 7,
