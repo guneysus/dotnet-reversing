@@ -102,5 +102,4 @@ namespace DbgNet.Core
     }
 
     public delegate uint PTHREAD_START_ROUTINE(IntPtr lpThreadParameter);
-
 }

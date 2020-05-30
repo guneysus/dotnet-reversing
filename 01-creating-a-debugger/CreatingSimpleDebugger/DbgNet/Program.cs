@@ -19,7 +19,7 @@ namespace DbgNet
                     PROCESS_INFORMATION pInfo = NativeHelpers.CreateProcess(
                         applicationName: null,
                         commandLine: o.Process,
-                        flags: CreateProcessFlags.DEBUG_PROCESS
+                        flags: CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS | CreateProcessFlags.DETACHED_PROCESS
                     );
 
                     Process debuggee = Process.GetProcessById(pInfo.dwProcessId);
@@ -89,9 +89,6 @@ namespace DbgNet
                                 break;
 
                         }
-
-                        Console.ReadLine();
-
 
                         OK = NativeMethods.ContinueDebugEvent(EVENT.dwProcessId, EVENT.dwThreadId, DBG_CONTINUE_NEXT_STATUS);
                         ERROR_CODE = Marshal.GetLastWin32Error();

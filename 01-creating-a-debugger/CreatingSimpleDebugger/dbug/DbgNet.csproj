@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7A144F34-D4FC-45BF-A1EB-455D01B84B16}</ProjectGuid>
+    <ProjectGuid>{E4305CD4-3B1D-4A8B-AEDC-44E2A1684789}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>SimpleDebugger</RootNamespace>
-    <AssemblyName>SimpleDebugger</AssemblyName>
+    <RootNamespace>dbug</RootNamespace>
+    <AssemblyName>dbug</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -32,10 +32,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CommandLine, Version=2.8.0.0, Culture=neutral, PublicKeyToken=5a870481e358d379, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommandLineParser.2.8.0\lib\net461\CommandLine.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,18 +46,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="NativeHelpers.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Options.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DbgNet.Core\DbgNet.Core.csproj">
-      <Project>{57AA2145-BB18-462D-8567-4E4963242DC2}</Project>
+      <Project>{57aa2145-bb18-462d-8567-4e4963242dc2}</Project>
       <Name>DbgNet.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Debuggee\Debuggee.csproj">
