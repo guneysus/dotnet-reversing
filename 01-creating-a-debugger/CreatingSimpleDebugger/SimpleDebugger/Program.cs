@@ -105,7 +105,7 @@ namespace SimpleDebugger
 
         private static string ProcessExceptionDebugEvent(DEBUG_EVENT evt)
         {
-            if (evt.Exception.dwFirstChance && evt.Exception.ExceptionRecord.ExceptionCode != decimal.Zero) {
+            if (evt.Exception.dwFirstChance != decimal.Zero && evt.Exception.ExceptionRecord.ExceptionCode != decimal.Zero) {
                 DBG_CONTINUE_NEXT_STATUS = ContinueStatus.DBG_EXCEPTION_NOT_HANDLED;
             } else
             {
@@ -210,9 +210,10 @@ namespace SimpleDebugger
             switch (command)
             {
                 case "!start":
+                    Stop();
                     APPLICATION = GetCommand($"Input the application name = ? ({DEFAULT_DEBUGGEE})");
                     APPLICATION = string.IsNullOrEmpty(APPLICATION) ? DEFAULT_DEBUGGEE : APPLICATION;
-                    debuggee = StartDebuggee(APPLICATION, CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS);
+                    debuggee = StartDebuggee(APPLICATION, CreateProcessFlags.DEBUG_PROCESS);
                     break;
                 case "!res":
                     Stop();
@@ -308,7 +309,7 @@ namespace SimpleDebugger
 
         private static void Stop()
         {
-            if (!debuggee.HasExited)
+            if (debuggee != null && !debuggee.HasExited)
             {
                 debuggee.Kill();
                 Console.WriteLine("Process killed");
