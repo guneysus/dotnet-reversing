@@ -197,11 +197,16 @@ namespace SimpleDebugger
         public struct EXCEPTION_RECORD
         {
             public uint ExceptionCode;
-            public uint ExceptionFlags;
+            public ExceptionFlags ExceptionFlags;
             public IntPtr ExceptionRecord;
             public IntPtr ExceptionAddress;
             public uint NumberParameters;
             [MarshalAs(UnmanagedType.ByValArray, SizeConst = 15, ArraySubType = UnmanagedType.U4)] public uint[] ExceptionInformation;
+        }
+
+        public enum ExceptionFlags {
+            EXCEPTION_CONTINUABLE = 0x00,
+            EXCEPTION_NONCONTINUABLE = 0x01
         }
 
         public delegate uint PTHREAD_START_ROUTINE(IntPtr lpThreadParameter);

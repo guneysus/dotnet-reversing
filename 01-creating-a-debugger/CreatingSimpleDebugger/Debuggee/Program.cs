@@ -6,7 +6,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Timers;
-using System.Windows.Threading;
 
 namespace Debuggee
 {
@@ -15,7 +14,7 @@ namespace Debuggee
         public static void Main(string[] args)
         {
             var myPid = Process.GetCurrentProcess().Id;
-            Console.WriteLine($"MYPID: {myPid}");
+            Console.WriteLine("MYPID: " + myPid);
 
             //return;
 
@@ -39,7 +38,7 @@ namespace Debuggee
         private static void HeartBeat()
         {
             var ts = DateTime.Now.ToString();
-            Trace.WriteLine($"[TRACE] {ts}"); 
+            Trace.WriteLine("[TRACE] " + ts); 
             //Debug.WriteLine($"[DEBUG] {ts}"); 
         }
     }

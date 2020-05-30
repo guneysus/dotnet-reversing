@@ -21,17 +21,18 @@ namespace SimpleDebugger
         static List<string> Timeline = new List<string>();
 
         static DEBUG_EVENT EVENT;
-        static uint WAITFOR_MS = (uint)TimeSpan.FromSeconds(1).TotalMilliseconds;
+        static uint WAITFOR_MS = (uint)TimeSpan.FromMilliseconds(5).TotalMilliseconds;
         static bool ERROR = true;
         static int ERROR_CODE = -1;
         static bool OK = false;
         static Dictionary<IntPtr, string> LoadedDlls = new Dictionary<IntPtr, string>();
 
+        const string DEFAULT_DEBUGGEE = @"C:\Windows\System32\notepad.exe"; //@"C:\Program Files\Notepad2\Notepad2.exe"; // "Debuggee.exe";
+        static ContinueStatus DBG_CONTINUE_NEXT_STATUS = ContinueStatus.DBG_CONTINUE;
+        static string APPLICATION;
 
         static void Main(string[] args)
         {
-            debuggee = StartDebuggee(CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS);
-
             DebuggerLog += (msg) =>
             {
                 Console.Write(msg);
@@ -104,8 +105,14 @@ namespace SimpleDebugger
 
         private static string ProcessExceptionDebugEvent(DEBUG_EVENT evt)
         {
-            return $"[EXCEPTION DEBUG] ExceptionCode: {evt.Exception.ExceptionRecord.ExceptionCode}";
-            // TODO throw new NotImplementedException();
+            if (evt.Exception.dwFirstChance && evt.Exception.ExceptionRecord.ExceptionCode != decimal.Zero) {
+                DBG_CONTINUE_NEXT_STATUS = ContinueStatus.DBG_EXCEPTION_NOT_HANDLED;
+            } else
+            {
+                DBG_CONTINUE_NEXT_STATUS = ContinueStatus.DBG_CONTINUE;
+            }
+
+            return $"[EXCEPTION DEBUG] ExceptionCode: {evt.Exception.ExceptionRecord.ExceptionCode.ToHex()}";
         }
 
         private static string ProcessUnloadDllDebugEvent(DEBUG_EVENT evt)
@@ -182,11 +189,11 @@ namespace SimpleDebugger
             return text;
         }
 
-        private static Process StartDebuggee(CreateProcessFlags flags)
+        private static Process StartDebuggee(string app = "test", CreateProcessFlags flags = CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS)
         {
             PROCESS_INFORMATION pInfo = NativeHelpers.CreateProcess(
-                applicationName: "Debuggee.exe",
-                commandLine: null,
+                applicationName: app,
+                commandLine: app,
                 flags: flags
     );
 
@@ -198,14 +205,19 @@ namespace SimpleDebugger
 
         static void CommandLoop()
         {
-            var command = Console.ReadLine().Trim();
+            var command = GetCommand();
 
             switch (command)
             {
+                case "!start":
+                    APPLICATION = GetCommand($"Input the application name = ? ({DEFAULT_DEBUGGEE})");
+                    APPLICATION = string.IsNullOrEmpty(APPLICATION) ? DEFAULT_DEBUGGEE : APPLICATION;
+                    debuggee = StartDebuggee(APPLICATION, CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS);
+                    break;
                 case "!res":
                     Stop();
                     ClearEvents();
-                    StartDebuggee(CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS);
+                    StartDebuggee(APPLICATION, CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS);
                     break;
                 case "!a":
                     Prompt("? Enter PID of the debuggee: ");
@@ -258,10 +270,14 @@ namespace SimpleDebugger
                 case "!h":
                     Console.WriteLine("help TODO");
                     break;
+                case "!end":
+                    var stack = Environment.StackTrace;
+                    Environment.Exit(0);
+                    break;
                 case "!n":
                 default:
                     ERROR = NativeMethods.WaitForDebugEvent(out EVENT, WAITFOR_MS);
-                    OK = ContinueDebugEvent(EVENT.dwProcessId, EVENT.dwThreadId, ContinueStatus.DBG_CONTINUE);
+                    OK = ContinueDebugEvent(EVENT.dwProcessId, EVENT.dwThreadId, DBG_CONTINUE_NEXT_STATUS);
                     ERROR_CODE = Marshal.GetLastWin32Error();
                     ProcessDebugEvent(EVENT);
                     Console.WriteLine();
@@ -271,6 +287,16 @@ namespace SimpleDebugger
 
             Prompt();
             CommandLoop();
+        }
+
+        private static string GetCommand(string prompt = null)
+        {
+            if (prompt != null)
+            {
+                Console.Write(prompt);
+            }
+
+            return Console.ReadLine().Trim();
         }
 
         private static void ClearEvents()
@@ -285,6 +311,7 @@ namespace SimpleDebugger
             if (!debuggee.HasExited)
             {
                 debuggee.Kill();
+                Console.WriteLine("Process killed");
             }
         }
 
