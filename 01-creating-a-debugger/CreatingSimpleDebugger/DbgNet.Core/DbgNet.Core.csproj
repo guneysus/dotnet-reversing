@@ -4,17 +4,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7A144F34-D4FC-45BF-A1EB-455D01B84B16}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>SimpleDebugger</RootNamespace>
-    <AssemblyName>SimpleDebugger</AssemblyName>
+    <ProjectGuid>{57AA2145-BB18-462D-8567-4E4963242DC2}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DbgNet.Core</RootNamespace>
+    <AssemblyName>DbgNet.Core</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -24,7 +23,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -43,24 +41,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="NativeHelpers.cs" />
+    <Compile Include="ContinueStatus.cs" />
+    <Compile Include="CreateProcessFlags.cs" />
+    <Compile Include="CREATE_PROCESS_DEBUG_INFO.cs" />
+    <Compile Include="CREATE_THREAD_DEBUG_INFO.cs" />
+    <Compile Include="DebugEventType.cs" />
+    <Compile Include="DEBUG_EVENT.cs" />
+    <Compile Include="ExceptionFlags.cs" />
+    <Compile Include="EXCEPTION_DEBUG_INFO.cs" />
+    <Compile Include="EXCEPTION_RECORD.cs" />
+    <Compile Include="EXIT_PROCESS_DEBUG_INFO.cs" />
+    <Compile Include="EXIT_THREAD_DEBUG_INFO.cs" />
+    <Compile Include="FileMapAccessType.cs" />
+    <Compile Include="FileMapProtection.cs" />
+    <Compile Include="FinalPathFlags.cs" />
+    <Compile Include="LOAD_DLL_DEBUG_INFO.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="NativeHelpers.cs" />
+    <Compile Include="OUTPUT_DEBUG_STRING_INFO.cs" />
+    <Compile Include="PROCESS_INFORMATION.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\DbgNet.Core\DbgNet.Core.csproj">
-      <Project>{57AA2145-BB18-462D-8567-4E4963242DC2}</Project>
-      <Name>DbgNet.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Debuggee\Debuggee.csproj">
-      <Project>{9dd341cd-0fa6-451a-a5e8-bae0d9a1dfd6}</Project>
-      <Name>Debuggee</Name>
-    </ProjectReference>
+    <Compile Include="RIP_INFO.cs" />
+    <Compile Include="SECURITY_ATTRIBUTES.cs" />
+    <Compile Include="STARTUPINFO.cs" />
+    <Compile Include="STARTUPINFOEX.cs" />
+    <Compile Include="UNLOAD_DLL_DEBUG_INFO.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

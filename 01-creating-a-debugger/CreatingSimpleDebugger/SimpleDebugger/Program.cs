@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DbgNet.Core;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static SimpleDebugger.NativeMethods;
+using static DbgNet.Core.NativeMethods;
 
 namespace SimpleDebugger
 {
@@ -195,7 +196,7 @@ namespace SimpleDebugger
                 applicationName: app,
                 commandLine: app,
                 flags: flags
-    );
+            );
 
             var process = Process.GetProcessById(pInfo.dwProcessId);
             Console.WriteLine($@"{process.ProcessName} started for debugging: PID: {pInfo.dwProcessId}");
