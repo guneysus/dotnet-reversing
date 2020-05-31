@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "DbgNet": {
-      "commandName": "Project",
-      "commandLineArgs": "notepad"
-    }
-  }
-}

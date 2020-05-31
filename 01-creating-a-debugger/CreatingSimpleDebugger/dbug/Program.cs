@@ -76,8 +76,10 @@ namespace dbug
             Process debuggee = Process.GetProcessById(pInfo.dwProcessId);
             Console.WriteLine($@"{debuggee.ProcessName} started for debugging: PID: {pInfo.dwProcessId}");
 
-
-
+            if(pInfo.dwProcessId == decimal.Zero)
+            {
+                Environment.Exit(-1);
+            }
 
             do
             {
