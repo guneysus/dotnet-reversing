@@ -16,6 +16,15 @@ namespace DbgNet.Core
         [DllImport(KERNEL32, SetLastError = true)]
         public static extern bool DebugActiveProcess(int dwProcessId);
 
+        [DllImport(KERNEL32, SetLastError = true)]
+        public static extern bool DebugActiveProcessStop(int dwProcessId);
+
+        [DllImport(KERNEL32, SetLastError = true)]
+        public static extern void DebugBreak();
+
+        [DllImport(KERNEL32, SetLastError = true)]
+        public static extern bool DebugSetProcessKillOnExit(bool KillOnExit);
+
         #region Create Process
         [DllImport(KERNEL32, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern bool CreateProcess(string lpApplicationName,

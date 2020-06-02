@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace dbug
 {
 
     public class Debugger
     {
+        Process debuggee;
+
         const int DLLPATH_BUFFER_SIZE = 2048;
         DEBUG_EVENT EVENT;
         uint WAITFOR_MS = (uint)TimeSpan.FromMilliseconds(5).TotalMilliseconds;
@@ -29,6 +32,11 @@ namespace dbug
         CreateProcess CreateProcess = (_) => { };
         ExitProcess ExitProcess = (_) => { };
 
+        internal void Pause()
+        {
+            //debuggerThread.Abort();
+        }
+
         CreateThread CreateThread = (_) => { };
         ExitThread ExitThread = (_) => { };
 
@@ -36,18 +44,52 @@ namespace dbug
 
         PROCESS_INFORMATION pInfo;
         private readonly Options opt;
+        Thread debuggerThread;
 
         public Debugger(Options options)
         {
             this.opt = options;
         }
 
-        public void Run()
+        public void Start()
+        {
+            debuggerThread = new Thread(new ThreadStart(Main))
+            {
+                IsBackground = true
+            };
+
+            debuggerThread.Start();
+
+            do
+            {
+                var command = Console.ReadLine();
+                switch (command)
+                {
+                    case "!c":
+                        Loop(debuggee);
+                        break;
+                    case "!b":
+                        NativeMethods.DebugBreak();
+                        Console.WriteLine($"code: {Marshal.GetLastWin32Error()}"); 
+                        break;
+                    case "!d":
+                        var result = NativeMethods.DebugActiveProcessStop(pInfo.dwProcessId);
+                        var code = Marshal.GetLastWin32Error();
+                        Console.WriteLine($"{result} code:{code}");
+                        break;
+                    default:
+                        break;
+                }
+            } while (true);
+        }
+
+        public void Main()
         {
             pInfo = NativeHelpers.CreateProcess(
-                applicationName: null,
+                applicationName:   null,
                 commandLine: opt.Process,
-                flags: CreateProcessFlags.DEBUG_PROCESS | CreateProcessFlags.DETACHED_PROCESS
+                //flags: CreateProcessFlags.DEBUG_ONLY_THIS_PROCESS | CreateProcessFlags.DETACHED_PROCESS
+                flags: CreateProcessFlags.DETACHED_PROCESS | CreateProcessFlags.DEBUG_PROCESS
             );
 
             if (pInfo.dwProcessId == decimal.Zero)
@@ -55,8 +97,21 @@ namespace dbug
                 Environment.Exit(-1);
             }
 
-            if (opt.LoadDLL) LoadDLL += Console.WriteLine;
-            if (opt.UnloadDLL) UnloadDLL += Console.WriteLine;
+            var _ = NativeMethods.DebugActiveProcess(pInfo.dwProcessId);
+            var code = Marshal.GetLastWin32Error();
+
+            NativeMethods.DebugSetProcessKillOnExit(false);
+
+
+            if (opt.LoadDLL) LoadDLL += (IntPtr address) =>
+            {
+                Console.WriteLine($"ModLoad: {address.Address()} {LoadedDlls[address]}");
+            };
+
+            if (opt.UnloadDLL) UnloadDLL += (IntPtr address) =>
+            {
+                Console.WriteLine($"ModUnLoad: {address.Address()} {LoadedDlls[address]}");
+            };
 
             if (opt.CreateProcess) CreateProcess += Console.WriteLine;
             if (opt.ExitProcess) ExitProcess += Console.WriteLine;
@@ -66,9 +121,15 @@ namespace dbug
 
             if (opt.Exception) Exception += Console.WriteLine;
 
-            Process debuggee = Process.GetProcessById(pInfo.dwProcessId);
+            debuggee = Process.GetProcessById(pInfo.dwProcessId);
             Console.WriteLine($@"{debuggee.ProcessName} started for debugging: PID: {pInfo.dwProcessId}");
 
+            Loop(debuggee);
+        }
+
+
+        private void Loop(Process debuggee)
+        {
             do
             {
                 ERROR = NativeMethods.WaitForDebugEvent(out EVENT, WAITFOR_MS);
@@ -96,7 +157,7 @@ namespace dbug
 
                         break;
                     case DebugEventType.UNLOAD_DLL_DEBUG_EVENT:
-                        UnloadDLL(LoadedDlls[EVENT.UnloadDll.lpBaseOfDll]);
+                        UnloadDLL(EVENT.UnloadDll.lpBaseOfDll);
                         break;
                     case DebugEventType.LOAD_DLL_DEBUG_EVENT:
 
@@ -106,26 +167,25 @@ namespace dbug
 
                         LoadedDlls[EVENT.LoadDll.lpBaseOfDll] = dllName;
 
-                        LoadDLL(dllName);
+                        LoadDLL(EVENT.LoadDll.lpBaseOfDll);
 
                         break;
                     case DebugEventType.EXIT_PROCESS_DEBUG_EVENT:
-                        ExitProcess($"[PROCESS EXIT] Exit Code:{EVENT.ExitProcess.dwExitCode.ToHex()}");
+                        ExitProcess($"[PROCESS EXIT] Exit Code:{EVENT.ExitProcess.dwExitCode.Address()}");
                         break;
                     case DebugEventType.EXIT_THREAD_DEBUG_EVENT:
-                        ExitThread($"[THREAD EXIT] ExitCode: {EVENT.ExitThread.dwExitCode.ToHex()}");
+                        ExitThread($"[THREAD EXIT] ExitCode: {EVENT.ExitThread.dwExitCode.Address()}");
                         break;
                     case DebugEventType.CREATE_PROCESS_DEBUG_EVENT:
 
                         NativeMethods.GetFinalPathNameByHandle(EVENT.CreateProcessInfo.hFile, sb, DLLPATH_BUFFER_SIZE, FinalPathFlags.FILE_NAME_NORMALIZED);
-
-                        CreateProcess(sb.ToString());
+                        CreateProcess($"[PROCESS CREATED] {EVENT.CreateProcessInfo.lpBaseOfImage.Address()} {sb.ToString()}");
                         break;
                     case DebugEventType.CREATE_THREAD_DEBUG_EVENT:
-                        CreateThread($"[THREAD CREATED] {EVENT.CreateThread.hThread.ToHex()}");
+                        CreateThread($"[THREAD CREATED] {EVENT.CreateThread.hThread.Address()}");
                         break;
                     case DebugEventType.EXCEPTION_DEBUG_EVENT:
-                        Exception($"[EXCEPTION] First: {EVENT.Exception.dwFirstChance} @ {EVENT.Exception.ExceptionRecord.ExceptionAddress.ToHex()} Code: {EVENT.Exception.ExceptionRecord.ExceptionCode.ToHex()}");
+                        Exception($"[EXCEPTION] First: {EVENT.Exception.dwFirstChance} @ {EVENT.Exception.ExceptionRecord.ExceptionAddress.Address()} Code: {EVENT.Exception.ExceptionRecord.ExceptionCode.Address()}");
                         DBG_CONTINUE_NEXT_STATUS = ContinueStatus.DBG_EXCEPTION_NOT_HANDLED;
                         break;
                     default:
@@ -137,6 +197,8 @@ namespace dbug
                 ERROR_CODE = Marshal.GetLastWin32Error();
             } while (true);
         }
+
+        public int ProcessId => pInfo.dwProcessId;
     }
 
 }

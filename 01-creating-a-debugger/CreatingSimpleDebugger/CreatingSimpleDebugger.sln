@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbgNet.Core", "DbgNet.Core\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DbgNet", "dbug\DbgNet.csproj", "{E4305CD4-3B1D-4A8B-AEDC-44E2A1684789}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sandbox", "Sandbox", "{99C9925C-6C5E-41BF-8918-BEE582061135}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "win32api-sandbox", "win32api-sandbox\win32api-sandbox.csproj", "{48F9C91E-2ECC-4C17-AE36-CD3275C0DF70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,9 +45,16 @@ Global
 		{E4305CD4-3B1D-4A8B-AEDC-44E2A1684789}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E4305CD4-3B1D-4A8B-AEDC-44E2A1684789}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E4305CD4-3B1D-4A8B-AEDC-44E2A1684789}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48F9C91E-2ECC-4C17-AE36-CD3275C0DF70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48F9C91E-2ECC-4C17-AE36-CD3275C0DF70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48F9C91E-2ECC-4C17-AE36-CD3275C0DF70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48F9C91E-2ECC-4C17-AE36-CD3275C0DF70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{48F9C91E-2ECC-4C17-AE36-CD3275C0DF70} = {99C9925C-6C5E-41BF-8918-BEE582061135}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A66C37D7-D51A-47DE-9D3B-47522B003229}

@@ -43,9 +43,21 @@ namespace DbgNet.Core
             var pointer = Marshal.AllocHGlobal(structSize);
             Marshal.Copy(debugInfo, 0, pointer, structSize);
 
-            var result = Marshal.PtrToStructure(pointer, typeof(T));
-            Marshal.FreeHGlobal(pointer);
-            return (T)result;
+            try
+            {
+                var result = Marshal.PtrToStructure(pointer, typeof(T));
+                return (T)result;
+            }
+            catch (Exception)
+            {
+                return default(T);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pointer);
+            }
+
+            return default(T);
         }
     }
 

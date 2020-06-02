@@ -14,6 +14,7 @@ namespace DbgNet
         [Option('e', "thread-exit", HelpText = "Subscribe to Exit Thread Events")] public bool ExitThread { get; set; }
         [Option('c', "exception", HelpText = "Subscribe to Exception Events")] public bool Exception { get; set; }
 
+        [Option("child", HelpText = "Run a child process. DO NOT USE.")] public bool IsChild { get; set; }
 
         [Value(0, MetaName = "process", HelpText = "Process to be Debugged")]
         public string Process { get; set; }

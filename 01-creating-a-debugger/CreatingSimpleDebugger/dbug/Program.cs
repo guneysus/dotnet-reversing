@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 namespace dbug
 {
-    public delegate void LoadDLL(string name);
-    public delegate void UnloadDLL(string name);
+    public delegate void LoadDLL(IntPtr address);
+    public delegate void UnloadDLL(IntPtr address);
 
     public delegate void CreateProcess(string name);
     public delegate void ExitProcess(string name);
@@ -22,21 +23,43 @@ namespace dbug
 
     class Program
     {
+        static Debugger debugger;
+
         static void Main(string[] args)
         {
 
-            Debugger debugger;
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(opt =>
                 {
+                    //debugger.Pause();
                     debugger = new Debugger(opt);
-                    debugger.Run();
+                    debugger.Start();
                 });
 
             do
             {
                 Console.ReadLine();
             } while (true);
+
+            //do
+            //{
+            //    var command = Console.ReadLine();
+            //    switch (command)
+            //    {
+            //        case "!detach":
+            //            var result = NativeMethods.DebugActiveProcessStop(debugger.ProcessId);
+            //            var code = Marshal.GetLastWin32Error();
+            //            Console.WriteLine($"{result} code:{code}");
+            //            break;
+            //        default:
+            //            break;
+            //    }
+            //} while (true);
+        }
+
+        private static void ReplLoop()
+        {
+
         }
     }
 

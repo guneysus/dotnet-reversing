@@ -12,8 +12,13 @@ namespace DbgNet.Core
 
     public static class Extensions
     {
-        public static string ToHex(this IntPtr value) => String.Format("0x{0:X}", value);
-        public static string ToHex(this int value) => String.Format("0x{0:X}", value);
-        public static string ToHex(this uint value) => String.Format("0x{0:X}", value);
+        public static string Address(this IntPtr value) => value.ToInt64().Address();
+        public static string Address(this UIntPtr value) => value.ToUInt64().Address();
+        public static string Address(this Int32 value) => String.Format("0x{0:x}", value);
+        public static string Address(this UInt32 value) => String.Format("0x{0:x}", value);
+        public static string Address(this Int16 value) => String.Format("0x{0:x}", value);
+        public static string Address(this UInt16 value) => String.Format("0x{0:x}", value);
+        public static string Address(this Int64 value) => String.Format("0x{0:x}", value);
+        public static string Address(this UInt64 value) => String.Format("0x{0:x}", value);
     }
 }
